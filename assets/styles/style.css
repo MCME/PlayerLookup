@@ -4,9 +4,7 @@ html {
 
 h1 { 
 	position: relative;
-	padding-right: 10px;
-	line-height: 50px;
-	left:100px;
+	padding-left: 90px;
 	margin-top: -60px;
 }
 
@@ -23,6 +21,7 @@ h2 {
 
 #logo {
 	position: static;
+	margin:10px;
 }
 
 .checkbutton {
@@ -104,7 +103,20 @@ h2 {
 	border-radius: 1px;
 }
 
-#OFFLINE {
+@font-face {
+  font-family: 'Oswald';
+  src: url('http://themes.googleusercontent.com/static/fonts/oswald/v8/-g5pDUSRgvxvOl5u-a_WHw.woff') format('woff'); 
+}
+
+#ServerDown {
+	background-color: #c14b4b;
+	border: solid black;
+	margin: 50px;
+	text-align: center;
+	font-family: "Oswald";
+}
+
+#offline_bg {
 	background-color: white;
 	position: fixed;
     width: 100%;
@@ -114,28 +126,4 @@ h2 {
     background: rgba(51,51,51,0.7);
     z-index: 10;
     /*pointer-events:none;*/
-  }
-
-#offline-header1 {
-	line-height: 200px;
-    margin-top: -155px;
-    position: absolute;
-    top: 50%;
-    margin-left: 310px;
-}
-
-#offline-header2 {
-    line-height: 200px;
-    margin-top: -100px;
-    position: absolute;
-    top: 50%;
-    margin-left: 150px;
-}
-
-#offline-header {
-    line-height: 350px;
-    margin-top: -100px;
-    position: absolute;
-    top: 50%;
-    margin-left: 350px;
 }

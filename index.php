@@ -1,11 +1,12 @@
 <html>
 	<head>
-		<title>MCME whitelisted since</title>
+		<title>MCME lookup</title>
 		<link rel="stylesheet" type="text/css" href="assets/styles/style.css">
 		<script type="text/javascript" src="http://code.jquery.com/jquery-latest.js"></script>
+		<link href='http://fonts.googleapis.com/css?family=Oswald' rel='stylesheet' type='text/css'>
 	</head>
 	<body>
-		<img id="logo" src="assets/img/MCME_logo.png"></img><h1>MCME whitelisted since</h1>
+		<img id="logo" src="assets/img/MCME_logo.png"></img><h1>MCME lookup</h1>
 		<form action="index.php" method="post">
 			<div class="w">
 				<div class="nameinput">
@@ -15,13 +16,16 @@
 		</form>
 	</body>
 </html>
-<?php include_once("analyticstracking.php") ?>
+<?php //include_once("analyticstracking.php") ?>
 <?php
-		global $input;
-		$input = $_POST["input"]; //declare the variable $input
+	if (!isset($_POST["input"]))
+		return;
 
-		global $whitelisted;
-		$whitelisted = "FALSE";
+	global $input;
+	$input = $_POST["input"]; //declare the variable $input
+
+	global $whitelisted;
+	$whitelisted = "FALSE";
 
 	function getPlayerInfo(){
 		if (!isset($_POST["input"]))
@@ -59,13 +63,13 @@
 
 		global $whitelisted;
 		$input = $_POST["input"];
-		$json = file_get_contents('http://mcme.joshr.hk/export/user/' . $input);
+		if(strstr($input, '/'))  {$json = "";} else {$json = file_get_contents('http://mcme.joshr.hk/export/user/' . strtolower($input));}
 		$group = json_decode($json, true);
 
 		if (!isset($group["group"]))
 			return;
 
-		if ($input != "q220"/* && $whitelisted != "FALSE"*/) {
+		if ($input != "q220" && $json != ""/* && $whitelisted != "FALSE"*/) {
 			echo "<h2>" . "Rank: " . $group["group"] ."</h2>";
 		}
 
@@ -80,7 +84,6 @@
 		global $json;
 		$json = file_get_contents('http://mcme-api.appspot.com/server/build');
 		$playerlist = json_decode($json, true);
-		//echo $playerlist->build->PlayerList[0];
 
 		foreach($playerlist["players"] as $player)
 		{
@@ -89,7 +92,7 @@
 	}
 	//getBuildPlayers();
 
-	function getUserOnlineBuild() {
+	function getUserOnlineBuild() {    
 
 	$json = file_get_contents('http://mcme.joshr.hk/server/build');
 	$playerlist = json_decode($json, true);
@@ -117,42 +120,87 @@
 	}
 	getUserOnlineFreeBuild();
 
-	function WebsiteStatus() {
+	function skin() {
 
-		$server = "mcme.joshr.hk";
-		$WebsiteStatus = "N/A";
+		global $input;
+		global $whitelisted;
+		$skin = "<div><img id='skin' src='http://build.mcmiddleearth.com:8123/tiles/faces/body/". $input .".png'></img></div>";
 
-		if (!$socket = @fsockopen($server, 80, $errno, $errstr, 30))
-		{
-		  $WebsiteStatus = "OFFLINE";
-		  echo "<h2 id='offline-header1'>Sorry, this service is Temporarily unavailable.</h1>";
-		  echo "<h2 id='offline-header2'>The Website of mcme seems <a href='/status/'><font color='red'>down</font></a>, we could not get information back from the server</h2><div id='OFFLINE'></div>";
-		  echo "<a href='aaldim.tk/mcme/status'><h2 id='offline-header'>aaldim.tk/mcme/status</a> for a status page</h2>";
-		}
-		else 
-		{
-		  $WebsiteStatus = "ONLINE";
-		}
-	}
-	WebsiteStatus();
-
-		function skin() {
-
-			global $input;
-			global $whitelisted;
-			$skin = "<div><img id='skin' src='http://build.mcmiddleearth.com:8123/tiles/faces/body/". $input .".png'></img></div>";
-
-	/*		if ($whitelisted == "TRUE") {
-				echo $skin;
-			}
-			else {
-				return false;
-			}*/
+	/*	if ($whitelisted == "TRUE") {
 			echo $skin;
 		}
+		else {
+			return false;
+		}*/
+	}
 	//skin();
 
+	function ServerStatus() {
 
+		function BuildServerStatus() {
+
+			$server = "build.mcmiddleearth.com";
+
+			if (!$socket = @fsockopen($server, 25565, $errno, $errstr, 60))
+			{
+				echo "<strong><h1 id='ServerDown'>The Build Server is Unexpected offline</h1></strong>";
+			}
+		}
+		BuildServerStatus();
+
+		function FreeBuildServerStatus() {
+
+			$server = "freebuild.mcmiddleearth.com";
+
+			if (!$socket = @fsockopen($server, 25565, $errno, $errstr, 60))
+			{
+				echo "<strong><h1 id='ServerDown'>The FreeBuild Server is Unexpected offline</h1></strong>";
+			}
+		}
+
+		function PVPServerStatus() {
+
+			$server = "pvp.mcmiddleearth.com";
+
+			if (!$socket = @fsockopen($server, 25565, $errno, $errstr, 60))
+			{
+				echo "<strong><h1 id='ServerDown'>The PVP Server is Unexpected offline</h1></strong>";
+			}
+		}
+		PVPServerStatus();
+
+		function APIstatus() {
+
+			$server = "mcme.joshr.hk";
+
+			if (!$socket = @fsockopen($server, 80, $errno, $errstr, 60))
+			{
+				echo "<strong><h1 id='ServerDown'>The API is Unexpected offline</h1></strong>";
+				echo "<div id='offline_bg'></div>";
+			}
+		}
+		APIstatus();
+    }
+	ServerStatus();
+
+	function RankLookup() {
+
+		global $input;
+		if(strstr($input, '/')) {$json = file_get_contents('http://mcme.joshr.hk/export'.$input);} else {$json = "";}
+		$playerlist = json_decode($json, true);
+
+		if ($json != "") {
+			foreach($playerlist["players"] as $player)
+			{
+				echo "<h3>" . $player . "<br></h3>";
+			}
+		}
+	}
+	RankLookup();
 ?>
+
+
+
+
 
 
