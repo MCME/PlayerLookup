@@ -1,3 +1,4 @@
+<?php //include_once("analyticstracking.php") ?>
 <html>
 	<head>
 		<title>MCME lookup</title>
@@ -14,9 +15,66 @@
 				</div>
 			<input class="checkbutton" type="submit" value="check">
 		</form>
+		<div id="side">	
+			<div id="sidebar">
+				<h1>Information</h1>
+				<p><strong>/(rankhere)</strong> displays the users with that rank</p>
+				<p><strong>(userhere)</strong> displays information about a user</p>
+				<p><strong>/build</strong> displays information about the buildserver</p>
+				<p><strong>/freebuild</strong> displays information about the freebuildserver</p>
+			</div>	
+	<?php
+		function ServerStatus() {
+
+			function BuildServerStatus() {
+
+				$server = "build.mcmiddleearth.com";
+
+				if (!$socket = @fsockopen($server, 25565, $errno, $errstr, 60))
+				{
+					echo "<strong><h1 id='ServerDown'>The Build Server is Unexpected offline</h1></strong>";
+				}
+			}
+			BuildServerStatus();
+
+			function FreeBuildServerStatus() {
+
+				$server = "freebuild.mcmiddleearth.com";
+
+				if (!$socket = @fsockopen($server, 25565, $errno, $errstr, 60))
+				{
+					echo "<strong><h1 id='ServerDown'>The FreeBuild Server is Unexpected offline</h1></strong>";
+				}
+			}
+
+			function PVPServerStatus() {
+
+				$server = "pvp.mcmiddleearth.com";
+
+				if (!$socket = @fsockopen($server, 25565, $errno, $errstr, 60))
+				{
+					echo "<strong><h1 id='ServerDown'>The PVP Server is Unexpected offline</h1></strong>";
+				}
+			}
+			PVPServerStatus();
+
+			function APIstatus() {
+
+				$server = "mcme.joshr.hk";
+
+				if (!$socket = @fsockopen($server, 80, $errno, $errstr, 60))
+				{
+					echo "<strong><h1 id='ServerDown'>The API is Unexpected offline</h1></strong>";
+					echo "<div id='offline_bg'></div>";
+				}
+			}
+			APIstatus();
+	    }
+		ServerStatus();
+	?>
+		</div>
 	</body>
 </html>
-<?php //include_once("analyticstracking.php") ?>
 <?php
 	if (!isset($_POST["input"]))
 		return;
@@ -124,7 +182,7 @@
 
 		global $input;
 		global $whitelisted;
-		$skin = "<div><img id='skin' src='http://build.mcmiddleearth.com:8123/tiles/faces/body/". $input .".png'></img></div>";
+		$skin = "<div><img id='skin' src='http://build.mcmiddleearth.com:8123/tiles/faces/body/". strtolower($input) .".png'></img></div>";
 
 	/*	if ($whitelisted == "TRUE") {
 			echo $skin;
@@ -135,58 +193,10 @@
 	}
 	//skin();
 
-	function ServerStatus() {
-
-		function BuildServerStatus() {
-
-			$server = "build.mcmiddleearth.com";
-
-			if (!$socket = @fsockopen($server, 25565, $errno, $errstr, 60))
-			{
-				echo "<strong><h1 id='ServerDown'>The Build Server is Unexpected offline</h1></strong>";
-			}
-		}
-		BuildServerStatus();
-
-		function FreeBuildServerStatus() {
-
-			$server = "freebuild.mcmiddleearth.com";
-
-			if (!$socket = @fsockopen($server, 25565, $errno, $errstr, 60))
-			{
-				echo "<strong><h1 id='ServerDown'>The FreeBuild Server is Unexpected offline</h1></strong>";
-			}
-		}
-
-		function PVPServerStatus() {
-
-			$server = "pvp.mcmiddleearth.com";
-
-			if (!$socket = @fsockopen($server, 25565, $errno, $errstr, 60))
-			{
-				echo "<strong><h1 id='ServerDown'>The PVP Server is Unexpected offline</h1></strong>";
-			}
-		}
-		PVPServerStatus();
-
-		function APIstatus() {
-
-			$server = "mcme.joshr.hk";
-
-			if (!$socket = @fsockopen($server, 80, $errno, $errstr, 60))
-			{
-				echo "<strong><h1 id='ServerDown'>The API is Unexpected offline</h1></strong>";
-				echo "<div id='offline_bg'></div>";
-			}
-		}
-		APIstatus();
-    }
-	ServerStatus();
-
 	function RankLookup() {
 
 		global $input;
-		if(strstr($input, '/')) {$json = file_get_contents('http://mcme.joshr.hk/export'.$input);} else {$json = "";}
+		if($input != "/build" && $input != "/freebuild" && $input != "/pvp" && $input != "/PVP" && strstr($input, '/')) {$json = file_get_contents('http://mcme.joshr.hk/export'.$input);} else {$json = "";}
 		$playerlist = json_decode($json, true);
 
 		if ($json != "") {
@@ -197,10 +207,41 @@
 		}
 	}
 	RankLookup();
+
+	function serverCheck() {
+
+		global $input;
+		if (strtolower($input) != "/pvp" && strstr($input, '/')) {$json = file_get_contents('http://mcme.joshr.hk/server' . $input);} else {$json = "";}
+		$server = json_decode($json, true);
+
+		if ($input == "/build") {
+
+			echo "<h2>BuildServer</h2>";
+			echo "<h3>Status: " . $server["status"] . "</h2>";
+			echo "<h3>" . $server["num_players"] . "/" . $server["maxplayers"] . "</h3>";
+			echo "<h2>Online List:</h2>";
+
+			foreach($server["players"] as $player)
+			{
+				echo "<img src='http://build.mcmiddleearth.com:8123/tiles/faces/16x16/".$player.".png'></img>".$player . "<br>";
+			}
+		}
+		if ($input == "/freebuild") {
+
+			echo "<h2>FreeBuildServer</h2>";
+			echo "<h3>Status: " . $server["status"] . "</h2>";
+			echo "<h3>" . $server["num_players"] . "/" . $server["maxplayers"] . "</h3>";
+			echo "<h2>Online List:</h2>";
+
+			foreach($server["players"] as $player)
+			{
+				echo "<img src='http://freebuild.mcmiddleearth.com:8123/tiles/faces/16x16/".$player.".png'></img>".$player . "<br>";
+			}
+		}
+		if (strtolower($input) == "/pvp") {
+			echo "<h2>nothing found</h2>";
+		}
+	}
+	serverCheck();
+
 ?>
-
-
-
-
-
-
