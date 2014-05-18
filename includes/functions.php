@@ -1,64 +1,64 @@
-	<?php
-		function ServerStatus() {
+<h1>The Functions of the MCME lookup</h1>
+<?php
+	function ServerStatus() {
 
-			function BuildServerStatus() {
+		function BuildServerStatus() {
 
-				$server = "build.mcmiddleearth.com";
+			$server = "build.mcmiddleearth.com";
 
-				if (!$socket = @fsockopen($server, 25565, $errno, $errstr, 60))
-				{
-					echo "<strong><h1 id='ServerDown'>The Build Server is Unexpected offline</h1></strong>";
-				}
+			if (!$socket = @fsockopen($server, 25565, $errno, $errstr, 60))
+			{
+				echo "<strong><h1 id='ServerDown'>The Build Server is Unexpected offline</h1></strong>";
 			}
-			BuildServerStatus();
+		}
+		BuildServerStatus();
 
-			function FreeBuildServerStatus() {
+		function FreeBuildServerStatus() {
 
-				$server = "freebuild.mcmiddleearth.com";
+			$server = "freebuild.mcmiddleearth.com";
 
-				if (!$socket = @fsockopen($server, 25565, $errno, $errstr, 60))
-				{
-					echo "<strong><h1 id='ServerDown'>The FreeBuild Server is Unexpected offline</h1></strong>";
-				}
+			if (!$socket = @fsockopen($server, 25565, $errno, $errstr, 60))
+			{
+				echo "<strong><h1 id='ServerDown'>The FreeBuild Server is Unexpected offline</h1></strong>";
 			}
+		}
 
-			function PVPServerStatus() {
+		function PVPServerStatus() {
 
-				$server = "pvp.mcmiddleearth.com";
+			$server = "pvp.mcmiddleearth.com";
 
-				if (!$socket = @fsockopen($server, 25565, $errno, $errstr, 60))
-				{
-					echo "<strong><h1 id='ServerDown'>The PVP Server is Unexpected offline</h1></strong>";
-				}
+			if (!$socket = @fsockopen($server, 25565, $errno, $errstr, 60))
+			{
+				echo "<strong><h1 id='ServerDown'>The PVP Server is Unexpected offline</h1></strong>";
 			}
-			PVPServerStatus();
+		}
+		PVPServerStatus();
 
-			function APIstatus() {
+		function APIstatus() {
 
-				$server = "mcme.joshr.hk";
+			$server = "mcme.joshr.hk";
 
-				if (!$socket = @fsockopen($server, 80, $errno, $errstr, 60))
-				{
-					echo "<strong><h1 id='ServerDown'>The API is Unexpected offline</h1></strong>";
-					echo "<div id='offline_bg'></div>";
-				}
+			if (!$socket = @fsockopen($server, 80, $errno, $errstr, 60))
+			{
+				echo "<strong><h1 id='ServerDown'>The API is Unexpected offline</h1></strong>";
+				echo "<div id='offline_bg'></div>";
 			}
-			APIstatus();
-	    }
+		}
+		APIstatus();
+	}
 	?>
 <?php
-	if (!isset($_POST["input"]))
-		return;
-
-	global $input;
-	$input = $_POST["input"]; //declare the variable $input
-
 	function userLookup() {
 
-		function getRank() {
-			if (!isset($_POST["input"]))
-				return;
+		if (!isset($_POST["input"]))
+			return;
 
+		global $input;
+		$input = $_POST["input"]; //declare the variable $input.
+
+		function getRank() {
+
+			global $input;
 			global $whitelisted;
 			$input = $_POST["input"];
 			if(strstr($input, '/'))  {$json = "";} else {$json = file_get_contents('http://mcme.joshr.hk/export/user/' . strtolower($input));}
@@ -105,21 +105,6 @@
 		}
 		getUserOnlineFreeBuild();
 
-		function skin() {
-
-			global $input;
-			global $whitelisted;
-			$skin = "<div><img id='skin' src='http://build.mcmiddleearth.com:8123/tiles/faces/body/". strtolower($input) .".png'></img></div>";
-
-		/*	if ($whitelisted == "TRUE") {
-				echo $skin;
-			}
-			else {
-				return false;
-			}*/
-		}
-		//skin();
-
 		function RankLookup() {
 
 			global $input;
@@ -134,6 +119,54 @@
 			}
 		}
 		RankLookup();
+
+		function skin() {
+
+			global $input;
+			global $whitelisted;
+			$skin = "<div><img src='http://build.mcmiddleearth.com:8123/tiles/faces/32x32/". strtolower($input) .".png'></img></div>";
+
+		/*	if ($whitelisted == "TRUE") {
+				echo $skin;
+			}
+			else {
+				return false;
+			}*/
+			echo $skin;
+		}
+		//skin();
+
+		function getUserOnlineTS() {
+
+			require_once("includes/ts3/libraries/TeamSpeak3/TeamSpeak3.php");
+
+			$ts3_VirtualServer = TeamSpeak3::factory("serverquery://ts.mcmiddleearth.com:10011/?server_port=9987");
+
+			global $input;
+			global $onlineList; $onlineList = $ts3_VirtualServer->getViewer(new TeamSpeak3_Viewer_Html());
+
+			if (strpos(strtolower($onlineList),strtolower($input)) !== false) {
+			    echo "<h2>" . $input . " is online on Teamspeak</h2>";
+			}
+			else {
+				$TeamspeakOnline = "FALSE";
+			}
+		}
+		getUserOnlineTS();
+
+		function getUserUUID() {
+
+			global $input;
+			$list = file_get_contents("https://ammar.pw/uuid.php?in=" . $input);
+
+			if ($list != "Username not valid!") {
+				echo "<h2>UUID: " . $list . "</h2>";
+			}
+			else {
+				echo "<h2>ERROR: username not found.</h2>";
+			}
+		}
+		getUserUUID();
 	}
 
 	function serverCheck() {
@@ -170,5 +203,4 @@
 			echo "<h2>nothing found</h2>";
 		}
 	}
-
 ?>
