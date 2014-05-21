@@ -61,7 +61,7 @@
 			global $input;
 			global $whitelisted;
 			$input = $_POST["input"];
-			if(strstr($input, '/'))  {$json = "";} else {$json = file_get_contents('http://mcme.joshr.hk/export/user/' . strtolower($input));}
+			if(strstr($input, '/') || $input == "") {$json = "";} else {$json = file_get_contents('http://mcme.joshr.hk/export/user/' . strtolower($input));}
 			$group = json_decode($json, true);
 
 			if (!isset($group["group"]))
@@ -83,10 +83,12 @@
 		$playerlist = json_decode($json, true);
 		global $input;
 
-			if(in_array($input, $playerlist['players']))
+			if(in_array($input, $playerlist['players'])) {
 			    echo "<h2>" . $input . " is online on <a href='http://build.mcmiddleearth.com:8123/index.html?playername=" . $input . "&zoom=8'>BuildServer</a></h2>";
-			else
+			}
+			else {
 				return false;
+			}
 		    
 		}
 		getUserOnlineBuild();
@@ -97,11 +99,12 @@
 		$playerlist = json_decode($json, true);
 		global $input;
 
-			if(in_array($input, $playerlist['players']))
+			if(in_array($input, $playerlist['players'])) {
 		    	echo "<h2>" . $input . " is online on <a href='http://freebuild.mcmiddleearth.com:8123/index.html?playername=" . $input . "&zoom=8'>FreeBuildServer</a></h2>";
-			else
+			}
+			else {
 				return false;
-		    
+			}	    
 		}
 		getUserOnlineFreeBuild();
 
@@ -163,7 +166,7 @@
 				echo "<h2>UUID: " . $list . "</h2>";
 			}
 			else {
-				echo "<h2>ERROR: username not found.</h2>";
+				$userUUID = "not found";
 			}
 		}
 		getUserUUID();
