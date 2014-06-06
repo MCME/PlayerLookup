@@ -1,4 +1,3 @@
-<h1>The Functions of the MCME lookup</h1>
 <?php
 	function ServerStatus() {
 
@@ -56,23 +55,52 @@
 		global $input;
 		$input = $_POST["input"]; //declare the variable $input.
 
+		function getUserUUID() { //rewrite it
+
+			global $input; 
+			$list = file_get_contents("https://ammar.pw/uuid.php?in=" . $input);
+			if (strlen($input) == 32) {$input = $list;} else {$input = $_POST["input"];}
+
+			if (strstr($input, '/')) {
+				$UUID = "";
+			}
+
+			else {
+				if (strlen($input) == 32) {
+					echo "<h2>Username: " . $list . "</h2>";
+				}
+				if ($list == "Username not valid!") {
+					echo "<h2>ERROR</h2>";
+				}
+				else {
+					echo "<h2>UUID: " . $list . "</h2>";
+				}
+			}
+		}
+		getUserUUID(); 
+
 		function getRank() {
 
 			global $input;
 			global $whitelisted;
-			$input = $_POST["input"];
+			
 			if(strstr($input, '/') || $input == "") {$json = "";} else {$json = file_get_contents('http://mcme.joshr.hk/export/user/' . strtolower($input));}
 			$group = json_decode($json, true);
 
 			if (!isset($group["group"]))
 				return;
 
-			if ($input != "q220" && $json != ""/* && $whitelisted != "FALSE"*/) {
+			if ($input != "q220" && $json != "" && $group["staff"] != "true") {
 				echo "<h2>" . "Rank: " . $group["group"] ."</h2>";
 			}
 
-			if ($input == "q220"/* && $whitelisted != "FALSE"*/){
+			if ($input == "q220"){
 				echo "<h2>Rank: Eru Iluvatar</h2>";
+			}
+
+			if ($group["staff"] == "true") {
+				echo "<h2>" . "Rank: " . $group["group"] ."</h2>";
+				echo "<h2>" . $input . " is a staff member</h2>";
 			}
 		}
 		getRank();
@@ -84,7 +112,7 @@
 		global $input;
 
 			if(in_array($input, $playerlist['players'])) {
-			    echo "<h2>" . $input . " is online on <a href='http://build.mcmiddleearth.com:8123/index.html?playername=" . $input . "&zoom=8'>BuildServer</a></h2>";
+			    echo "<h2>" . $input . " is online on <a href='http://freebuild.mcmiddleearth.com:8123/index.html?playername=" . $input . "&zoom=8'>BuildServer</a></h2>";
 			}
 			else {
 				return false;
@@ -114,12 +142,15 @@
 			if($input != "/build" && $input != "/freebuild" && $input != "/pvp" && $input != "/PVP" && strstr($input, '/')) {$json = file_get_contents('http://mcme.joshr.hk/export'.$input);} else {$json = "";}
 			$playerlist = json_decode($json, true);
 
+			echo "<div id='rank'>";
+
 			if ($json != "") {
 				foreach($playerlist["players"] as $player)
 				{
 					echo "<h3>" . $player . "<br></h3>";
 				}
 			}
+			echo "</div>";
 		}
 		RankLookup();
 
@@ -127,7 +158,7 @@
 
 			global $input;
 			global $whitelisted;
-			$skin = "<div><img src='http://build.mcmiddleearth.com:8123/tiles/faces/32x32/". strtolower($input) .".png'></img></div>";
+			$skin = "<div><img src='http://freebuild.mcmiddleearth.com:8123/tiles/faces/32x32/". strtolower($input) .".png'></img></div>";
 
 		/*	if ($whitelisted == "TRUE") {
 				echo $skin;
@@ -141,35 +172,19 @@
 
 		function getUserOnlineTS() {
 
-			require_once("includes/ts3/libraries/TeamSpeak3/TeamSpeak3.php");
+			require_once("/ts3/libraries/TeamSpeak3/TeamSpeak3.php");
 
-			$ts3_VirtualServer = TeamSpeak3::factory("serverquery://ts.mcmiddleearth.com:10011/?server_port=9987");
+			global $ts3_VirtualServer; $ts3_VirtualServer = TeamSpeak3::factory("serverquery://ts.mcmiddleearth.com:10011/?server_port=9987");
 
 			global $input;
-			global $onlineList; $onlineList = $ts3_VirtualServer->getViewer(new TeamSpeak3_Viewer_Html());
 
-			if (strpos(strtolower($onlineList),strtolower($input)) !== false) {
-			    echo "<h2>" . $input . " is online on Teamspeak</h2>";
-			}
-			else {
-				$TeamspeakOnline = "FALSE";
+ 			if ($input != "/build" && $input != "/freebuild" && $input != "/teamspeak" ) {
+				$client = $ts3_VirtualServer->clientGetByName($input);
+
+				echo "<h2>" . $input . ' is online on teamspeak in channel "' . $ts3_VirtualServer->channelGetById($client['cid']) . '"</h2>';
 			}
 		}
 		getUserOnlineTS();
-
-		function getUserUUID() {
-
-			global $input;
-			$list = file_get_contents("https://ammar.pw/uuid.php?in=" . $input);
-
-			if ($list != "Username not valid!") {
-				echo "<h2>UUID: " . $list . "</h2>";
-			}
-			else {
-				$userUUID = "not found";
-			}
-		}
-		getUserUUID();
 	}
 
 	function serverCheck() {
@@ -189,6 +204,13 @@
 			{
 				echo "<img src='http://build.mcmiddleearth.com:8123/tiles/faces/16x16/".$player.".png'></img>".$player . "<br>";
 			}
+
+			echo "<h2>Plugins:</h2>";
+
+			foreach($server["plugins"] as $plugin)
+			{
+				echo $plugin . "<br>";
+			}
 		}
 		if ($input == "/freebuild") {
 
@@ -201,9 +223,24 @@
 			{
 				echo "<img src='http://freebuild.mcmiddleearth.com:8123/tiles/faces/16x16/".$player.".png'></img>".$player . "<br>";
 			}
+
+			echo "<h2>Plugins:</h2>";
+
+			foreach($server["plugins"] as $plugin)
+			{
+				echo $plugin . "<br>";
+			}
 		}
+		/*if ($input == "/teamspeak") {
+
+			global $ts3_VirtualServer;
+			echo $ts3_VirtualServer->getViewer(new TeamSpeak3_Viewer_Html("ts3/images/viewericons/", "ts3/images/countryflags/", "data:image"));
+		}*/
 		if (strtolower($input) == "/pvp") {
 			echo "<h2>nothing found</h2>";
 		}
 	}
 ?>
+
+
+
