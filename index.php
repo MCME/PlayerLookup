@@ -1,5 +1,6 @@
-<?php //include_once("analyticstracking.php") ?>
-<?php require_once("/includes/functions.php") ?>
+<?php include_once("analyticstracking.php") ?>
+<?php require_once("/includes/MainFunctions.php") ?>
+<?php require_once("/includes/UUIDFunctions.php") ?>
 <html>
 	<head>
 		<title>MCME lookup</title>
@@ -23,6 +24,7 @@
 				<p><strong>(userhere)</strong> displays information about a user</p>
 				<p><strong>/build</strong> displays information about the buildserver</p>
 				<p><strong>/freebuild</strong> displays information about the freebuildserver</p>
+				<p><strong>/teamspeak</strong> displays information about Teamspeak</p>
 			</div>	
 			<div id="offline">
 	<?php
