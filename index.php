@@ -24,7 +24,7 @@
 				<p><strong>(userhere)</strong> displays information about a user</p>
 				<p><strong>/build</strong> displays information about the buildserver</p>
 				<p><strong>/freebuild</strong> displays information about the freebuildserver</p>
-				<p><strong>/teamspeak</strong> displays information about Teamspeak</p>
+				<!--<p><strong>/teamspeak</strong> displays information about Teamspeak</p>-->
 			</div>	
 			<div id="offline">
 	<?php
@@ -35,6 +35,6 @@
 	</body>
 </html>
 <?php
-	userLookup();
 	serverCheck();
+	userLookup();
 ?>

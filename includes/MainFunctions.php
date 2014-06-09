@@ -21,6 +21,7 @@
 				echo "<strong><h1 id='ServerDown'>The FreeBuild Server is Unexpected offline</h1></strong>";
 			}
 		}
+		FreeBuildServerStatus();
 
 		function PVPServerStatus() {
 
@@ -83,6 +84,7 @@
 
 			global $input;
 			global $whitelisted;
+			$developers = array("aaldim", "dallen1393", "dags_", "Mnemon","ScoobyDeezy","Tythus");
 			
 			if(strstr($input, '/') || $input == "") {$json = "";} else {$json = file_get_contents('http://mcme.joshr.hk/export/user/' . strtolower($input));}
 			$group = json_decode($json, true);
@@ -90,7 +92,7 @@
 			if (!isset($group["group"]))
 				return;
 
-			if ($input != "q220" && $json != "" && $group["staff"] != "true") {
+			if ($input != "q220" && $json != "" && $group["staff"] != "true" && in_array($input, $developers) == false) {
 				echo "<h2>" . "Rank: " . $group["group"] ."</h2>";
 			}
 
@@ -101,6 +103,10 @@
 			if ($group["staff"] == "true") {
 				echo "<h2>" . "Rank: " . $group["group"] ."</h2>";
 				echo "<h2>" . $input . " is a staff member</h2>";
+			}
+			if (in_array($input, $developers)) {
+				echo "<h2>" . "Rank: " . $group["group"] ."</h2>";
+				echo "<h2>" . $input . " is a developer";
 			}
 		}
 		getRank();
@@ -139,7 +145,7 @@
 		function RankLookup() {
 
 			global $input;
-			if($input != "/build" && $input != "/freebuild" && $input != "/pvp" && $input != "/PVP" && strstr($input, '/')) {$json = file_get_contents('http://mcme.joshr.hk/export'.$input);} else {$json = "";}
+			if($input != "/build" && $input != "/freebuild" && $input != "/pvp" && $input != "/PVP" && $input != "/teamspeak" && strstr($input, '/')) {$json = file_get_contents('http://mcme.joshr.hk/export'.$input);} else {$json = "";}
 			$playerlist = json_decode($json, true);
 
 			echo "<div id='rank'>";
@@ -170,26 +176,40 @@
 		}
 		//skin();
 
+		function startConversation() {
+
+			global $input;
+			if (strpos($input, '/')) {
+				echo "<a href='http://www.mcmiddleearth.com/conversations/add?to=" . $input . "'><h2>Start a conversation with ". $input ."</h2></a>";
+			}
+		}
+		startConversation();
+
 		function getUserOnlineTS() {
 
 			require_once("/ts3/libraries/TeamSpeak3/TeamSpeak3.php");
 
-			global $ts3_VirtualServer; $ts3_VirtualServer = TeamSpeak3::factory("serverquery://ts.mcmiddleearth.com:10011/?server_port=9987");
+			$ts3_VirtualServer = TeamSpeak3::factory("serverquery://ts.mcmiddleearth.com:10011/?server_port=9987");
 
 			global $input;
 
- 			if ($input != "/build" && $input != "/freebuild" && $input != "/teamspeak" ) {
+ 			if (strpos($input, '/')) {
 				$client = $ts3_VirtualServer->clientGetByName($input);
 
 				echo "<h2>" . $input . ' is online on teamspeak in channel "' . $ts3_VirtualServer->channelGetById($client['cid']) . '"</h2>';
 			}
 		}
-		getUserOnlineTS();
+		//getUserOnlineTS();
 	}
 
 	function serverCheck() {
 
+		if (!isset($_POST["input"]))
+			return;
+
 		global $input;
+		$input = $_POST["input"]; //declare the variable $input.
+
 		if (strtolower($input) != "/pvp" && strstr($input, '/')) {$json = file_get_contents('http://mcme.joshr.hk/server' . $input);} else {$json = "";}
 		$server = json_decode($json, true);
 
@@ -202,7 +222,7 @@
 
 			foreach($server["players"] as $player)
 			{
-				echo "<img src='http://build.mcmiddleearth.com:8123/tiles/faces/16x16/".$player.".png'></img>".$player . "<br>";
+				echo "<img src='http://freebuild.mcmiddleearth.com:8123/tiles/faces/16x16/".$player.".png'></img>".$player . "<br>";
 			}
 
 			echo "<h2>Plugins:</h2>";
@@ -233,9 +253,13 @@
 		}
 		/*if ($input == "/teamspeak") {
 
-			global $ts3_VirtualServer;
-			echo $ts3_VirtualServer->getViewer(new TeamSpeak3_Viewer_Html("ts3/images/viewericons/", "ts3/images/countryflags/", "data:image"));
+			require_once("/ts3/libraries/TeamSpeak3/TeamSpeak3.php");
+
+			$ts3_VirtualServer = TeamSpeak3::factory("serverquery://ts.mcmiddleearth.com:10011/?server_port=9987");
+
+			echo $ts3_VirtualServer->getViewer(new TeamSpeak3_Viewer_Html("images/viewericons/", "images/countryflags/", "data:image"));
 		}*/
+
 		if (strtolower($input) == "/pvp") {
 			echo "<h2>nothing found</h2>";
 		}
