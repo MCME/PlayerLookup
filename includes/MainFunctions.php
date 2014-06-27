@@ -179,7 +179,7 @@
 		function startConversation() {
 
 			global $input;
-			if (strpos($input, '/')) {
+			if (strpos($input, '/') === false) {
 				echo "<a href='http://www.mcmiddleearth.com/conversations/add?to=" . $input . "'><h2>Start a conversation with ". $input ."</h2></a>";
 			}
 		}
@@ -193,13 +193,13 @@
 
 			global $input;
 
- 			if (strpos($input, '/')) {
+ 			if ($input != "") {
 				$client = $ts3_VirtualServer->clientGetByName($input);
 
 				echo "<h2>" . $input . ' is online on teamspeak in channel "' . $ts3_VirtualServer->channelGetById($client['cid']) . '"</h2>';
 			}
 		}
-		//getUserOnlineTS();
+		getUserOnlineTS();
 	}
 
 	function serverCheck() {
